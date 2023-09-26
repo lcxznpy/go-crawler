@@ -5,7 +5,10 @@ import (
 	"log"
 )
 
-func Run(seeds ...Request) {
+type SimpleEngine struct {
+}
+
+func (s SimpleEngine) Run(seeds ...Request) {
 	var requests []Request
 	for _, e := range seeds {
 		requests = append(requests, e)
