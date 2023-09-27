@@ -46,6 +46,6 @@ func DeterminEncoding(r *bufio.Reader) encoding.Encoding {
 	}
 	//截取1024个字节来推断文本格式类型
 	e, _, _ := charset.DetermineEncoding(bytes, "")
-	fmt.Println(e)
+	//fmt.Println(e)   打印编码
 	return e
 }
