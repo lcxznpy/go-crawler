@@ -6,6 +6,7 @@ import (
 )
 
 type SimpleEngine struct {
+	Scheduler Scheduler
 }
 
 func (s SimpleEngine) Run(seeds ...Request) {
@@ -13,6 +14,7 @@ func (s SimpleEngine) Run(seeds ...Request) {
 	for _, e := range seeds {
 		requests = append(requests, e)
 	}
+	// 开始是获取标签，后遍历每个标签的图书存入requesets中，最后获取图书详细内容
 	for len(requests) > 0 {
 		r := requests[0]
 		requests = requests[1:]
@@ -21,6 +23,7 @@ func (s SimpleEngine) Run(seeds ...Request) {
 		if err != nil {
 			log.Printf("fetch errof :", err)
 		}
+		//获取douban图书的html body文件
 		parseresult := r.ParseFunc(body)
 		requests = append(requests, parseresult.Requests...)
 		for _, items := range parseresult.Items {

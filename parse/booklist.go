@@ -12,15 +12,22 @@ func ParseBookList(content []byte) engine.ParseResult {
 	re := regexp.MustCompile(BookListRe)
 	match := re.FindAllSubmatch(content, -1)
 	result := engine.ParseResult{}
-
+	cnt := 0
 	for _, m := range match {
 		bookname := string(m[2])
-		result.Items = append(result.Items, m[2])
+		//result.Items = append(result.Items, engine.Item{
+		//	Url: string(m[2]),
+		//})
+		cnt++
+		if cnt > 100 {
+			return result
+		}
 		result.Requests = append(result.Requests, engine.Request{
 			Url: string(m[1]),
 			//函数式编程解决，跳转界面无书名问题
 			ParseFunc: func(c []byte) engine.ParseResult {
-				return ParseBookDetail(c, bookname)
+
+				return ParseBookDetail(c, bookname, string(m[1]))
 			},
 		})
 	}

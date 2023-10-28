@@ -20,9 +20,10 @@ var (
 	priceRe     = regexp.MustCompile(`<span class="pl">定价:</span> ([^<]+)<br/>`)
 	scoreRe     = regexp.MustCompile(`<strong class="ll rating_num " property="v:average"> ([^<]+) </strong>`)
 	introRe     = regexp.MustCompile(`<div class="intro">[\d\D]*?<p>([^<]+)</p></div>`)
+	idUrlRe     = regexp.MustCompile(`https://book.douban.com/subject/([0-9]+)/`)
 )
 
-func ParseBookDetail(content []byte, name string) engine.ParseResult {
+func ParseBookDetail(content []byte, name string, url string) engine.ParseResult {
 	//fmt.Printf("%s", content)
 	bookdetail := model.BookDetail{}
 	bookdetail.BookName = name
@@ -35,7 +36,14 @@ func ParseBookDetail(content []byte, name string) engine.ParseResult {
 	bookdetail.Score = ExtraString(content, scoreRe)
 	bookdetail.Price = ExtraString(content, priceRe)
 	result := engine.ParseResult{
-		Items: []interface{}{bookdetail},
+		Items: []engine.Item{
+			{
+				Url:     url,
+				Type:    "douban",
+				Id:      ExtraString([]byte(url), idUrlRe),
+				Payload: bookdetail,
+			},
+		},
 	}
 	return result
 }
@@ -46,5 +54,24 @@ func ExtraString(content []byte, re *regexp.Regexp) string {
 		return string(match[1])
 	} else {
 		return ""
+	}
+}
+
+type BookDetailParser struct {
+	name string
+}
+
+func (p *BookDetailParser) Parse(contents []byte, url string) engine.ParseResult {
+	return ParseBookDetail(contents, url, p.name)
+
+}
+
+func (p *BookDetailParser) Serialize() (name string, args interface{}) {
+	return "ParseBookDetail", p.name
+}
+
+func NewBookDetailParser(name string) *BookDetailParser {
+	return &BookDetailParser{
+		name: name,
 	}
 }
