@@ -62,7 +62,7 @@ type BookDetailParser struct {
 }
 
 func (p *BookDetailParser) Parse(contents []byte, url string) engine.ParseResult {
-	return ParseBookDetail(contents, url, p.name)
+	return ParseBookDetail(contents, p.name, url)
 
 }
 

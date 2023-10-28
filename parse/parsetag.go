@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"go-crawler/distributed/config"
 	"go-crawler/engine"
 	"regexp"
 )
@@ -8,7 +9,7 @@ import (
 const regexpStr = `<a href="([^"]+)" class="tag">([^"]+)</a>`
 
 // 通过正则获取网页标签
-func ParseTag(content []byte) engine.ParseResult {
+func ParseTag(content []byte, _ string) engine.ParseResult {
 	//<a href="/tag/小说" class="tag">小说</a>
 	re := regexp.MustCompile(regexpStr)
 	match := re.FindAllSubmatch(content, -1)
@@ -25,8 +26,8 @@ func ParseTag(content []byte) engine.ParseResult {
 			return result
 		}
 		result.Requests = append(result.Requests, engine.Request{
-			Url:       "https://book.douban.com" + string(m[1]),
-			ParseFunc: ParseBookList,
+			Url:   "https://book.douban.com" + string(m[1]),
+			Parse: engine.NewFuncParse(ParseBookList, config.ParseBookList),
 		})
 	}
 	return result

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-crawler/distributed/config"
 	"go-crawler/engine"
 	"go-crawler/parse"
 	"go-crawler/persist"
@@ -29,7 +30,7 @@ func main() {
 		ItemChan:  itemsave,
 	}
 	e.Run(engine.Request{
-		Url:       "https://book.douban.com/",
-		ParseFunc: parse.ParseTag,
+		Url:   "https://book.douban.com/",
+		Parse: engine.NewFuncParse(parse.ParseTag, config.ParseTagList),
 	})
 }

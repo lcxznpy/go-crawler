@@ -24,7 +24,7 @@ func (s SimpleEngine) Run(seeds ...Request) {
 			log.Printf("fetch errof :", err)
 		}
 		//获取douban图书的html body文件
-		parseresult := r.ParseFunc(body)
+		parseresult := r.Parse.Parse(body, r.Url)
 		requests = append(requests, parseresult.Requests...)
 		for _, items := range parseresult.Items {
 			log.Printf("got items : %s\n", items)

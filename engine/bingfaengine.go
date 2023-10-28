@@ -5,10 +5,13 @@ import (
 	"log"
 )
 
+type Processor func(Request) (ParseResult, error)
+
 type BingFaEngine struct {
-	Scheduler Scheduler //调度器类型
-	WorkCount int       //工人数量
-	ItemChan  chan Item //存处理的结果
+	Scheduler        Scheduler //调度器类型
+	WorkCount        int       //工人数量
+	ItemChan         chan Item //存处理的结果
+	RequestProcessor Processor //
 }
 
 type Scheduler interface {
@@ -29,7 +32,7 @@ func (b *BingFaEngine) Run(seeds ...Request) {
 	//创建工人，及分配并发调度器
 	for i := 0; i < b.WorkCount; i++ {
 		//创建工人，其实就是开启goroutine，监听请求的到来，处理请求
-		CreateWorker(b.Scheduler.WorkChan(), out, b.Scheduler)
+		b.CreateWorker(b.Scheduler.WorkChan(), out, b.Scheduler)
 	}
 	//提交任务进入任务队列
 	for _, r := range seeds {
@@ -54,14 +57,14 @@ func (b *BingFaEngine) Run(seeds ...Request) {
 }
 
 // 创建工人，
-func CreateWorker(in chan Request, out chan ParseResult, s Scheduler) {
+func (b *BingFaEngine) CreateWorker(in chan Request, out chan ParseResult, s Scheduler) {
 	//开
 	go func() {
 		for {
 			//每个工人都有自己的in chan用来接收并处理任务
-			s.WorkReady(in)                //告诉工人的接收队列已经空闲
-			request := <-in                //从工人的in  任务处理队列 中读 任务
-			result, err := worker(request) // 处理任务
+			s.WorkReady(in)                            //告诉工人的接收队列已经空闲
+			request := <-in                            //从工人的in  任务处理队列 中读 任务
+			result, err := b.RequestProcessor(request) // 处理任务
 			if err != nil {
 				continue
 			}
@@ -71,13 +74,13 @@ func CreateWorker(in chan Request, out chan ParseResult, s Scheduler) {
 	}()
 }
 
-func worker(r Request) (ParseResult, error) {
+func Worker(r Request) (ParseResult, error) {
 	//fmt.Printf("fetch url : %s\n", r.Url)
 	body, err := fetcher.Fetch(r.Url)
 	if err != nil {
 		log.Printf("fetch error:%s", err)
 		return ParseResult{}, err
 	}
-	return r.ParseFunc(body), nil
+	return r.Parse.Parse(body, r.Url), nil
 
 }
