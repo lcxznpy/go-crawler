@@ -1,2 +1,9 @@
 # go-crawler
-go实现的分布式爬虫
+爬取豆瓣豆瓣图书信息
+main分支是简易版go爬虫
+
+bingfa分支是并发版本的go爬虫，爬取效率很快，实现了simple调度器和queue调度器,
+simple调度器将任务发送给每个工人(goroutine)
+queue调度器有任务队列和工人队列，由调度器选取空闲的工人队列和任务队列进行匹配，进行任务分发
+
+distributed分支是分布式版本的go爬虫，通过jsonrpc注册els存储服务节点和工人节点
